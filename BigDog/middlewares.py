@@ -57,10 +57,6 @@ class BigdogSpiderMiddleware(object):
     def process_request(self,request,spider):
 
         proxyList = ["10.144.1.10:8080",\
-                     "defraprx-fihelprx.glb.nsn-net.net:8080",\
-                     "fihelprx-defraprx.glb.nsn-net.net:8080",\
-
-
                      ]
         pro_adr = random.choice(proxyList)
         print "Use Proxy -> ",pro_adr
