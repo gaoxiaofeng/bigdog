@@ -1,17 +1,24 @@
-import scrapy
 from scrapy.selector import  Selector
 from os.path import join,dirname,abspath
-class firstDog(scrapy.Spider):
-    name = "first"
-    def start_requests(self):
-        urls = ["https://www.zhihu.com/",\
-                ]
-        for url in urls:
-            yield scrapy.Request(url=url,callback=self.post_login, \
-                headers={
+from scrapy.http import Request,FormRequest
+from scrapy.spider import BaseSpider
+class firstDog(BaseSpider):
+    name = "zhihu"
+    headers_zhihu = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.75 Safari/537.36",
-                "Referer":"https://www.zhihu.com/"
-                })
+                "Referer":"https://www.zhihu.com/",
+                "Connection":"keep-alive",
+                "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+                "Accept-Encoding":"en,zh-CN;q=0.9,zh;q=0.8",
+                "Cache-Control":"max-age=0",
+                "Host":"www.zhihu.com",
+
+                }
+    urls = ["https://www.zhihu.com/"]
+    def start_requests(self):
+        for url in self.urls:
+            yield Request(url=url,callback=self.post_login, \
+                headers=self.headers_zhihu,meta={"cookiejar":1})
 
     def parse(self, response):
         CurDir = dirname(abspath(__file__))
@@ -23,5 +30,20 @@ class firstDog(scrapy.Spider):
             f.write(response.body)
         self.log("saved file %s"%filepath)
     def post_login(self,response):
+        print "post login:", response.headers
         xsrf = Selector(response).xpath("//input[@name='_xsrf']/@value").extract()[0]
-        print "xsrf:",xsrf
+        xsrf = "65303736363330342d333333352d343464392d396233622d316438373639636166653065"
+        # print "meta:",response.meta
+        return  [FormRequest("https://www.zhihu.com/login/phone_num",
+                            method="POST",
+                            meta={"cookiejar":response.meta["cookiejar"],"_xsrf":xsrf},
+                            headers=self.headers_zhihu,
+                            formdata={"phone_num":"13982133221","password":"newmedia","_xsrf":xsrf,"captcha_type:":"cn"},
+                            callback=self.after_login,
+
+                             )]
+
+    def after_login(self,response):
+        print "after_login"
+        print response.body
+
