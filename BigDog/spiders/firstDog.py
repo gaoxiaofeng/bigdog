@@ -30,7 +30,9 @@ class firstDog(BaseSpider):
             f.write(response.body)
         self.log("saved file %s"%filepath)
     def post_login(self,response):
-        print "post login:", response.headers
+        self.log_response("post_login.txt",response)
+
+
         xsrf = Selector(response).xpath("//input[@name='_xsrf']/@value").extract()[0]
         xsrf = "65303736363330342d333333352d343464392d396233622d316438373639636166653065"
         # print "meta:",response.meta
@@ -44,6 +46,13 @@ class firstDog(BaseSpider):
                              )]
 
     def after_login(self,response):
-        print "after_login"
-        print response.body
+        self.log_response("after_login.txt",response)
 
+
+    def log_response(self,logName,response):
+        CurDir = dirname(abspath(__file__))
+        cacheDir = join(dirname(CurDir), "cache")
+        filepath = join(cacheDir, logName)
+        log = "header:\n" + str(response.headers) + "\n" + "body" + str(response.body)
+        with open(filepath, "wb") as f:
+            f.write(log)
