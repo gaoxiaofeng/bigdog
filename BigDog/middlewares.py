@@ -57,6 +57,9 @@ class BigdogSpiderMiddleware(object):
     def process_request(self,request,spider):
 
         proxyList = ["10.144.1.10:8080",\
+                     "10.158.100.116:8080",\
+                     ]
+        proxyList = [ "10.158.100.116:8080",\
                      ]
         pro_adr = random.choice(proxyList)
         print "Use Proxy -> ",pro_adr
